@@ -8,12 +8,21 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+## TO DO:
 
-La Gpu con 112 livelli � inutilizzabile, possiamo dividere in integrata e dedicata, oppure dividere per le marche.
-Anche la memoria � problematica, ho gi� estratto la presenza o meno dell'SSD, ma bisogna pensare ad un modo di valutare la memoria.
+>La Gpu con 112 livelli � inutilizzabile, possiamo dividere in integrata e dedicata, oppure dividere per le marche.
+
+>> @Dario: Per la gpu farei innanzitutto una divisione tra integrata e dedicata, e tra quelle dedicate le suddividerei per VRAM (inizialmente pensavo di cercare dei prezzi per avere una stima quantitativa di quanto valga la gpu dedicata, però bisognerebbe cercare prezzi medi e visto che i modelli son tanti mi pare troppo lavoro e non chissà quanto significativo)
+
+
+>Anche la memoria � problematica, ho gi� estratto la presenza o meno dell'SSD, ma bisogna pensare ad un modo di valutare la memoria.
+
+>> @Dario: ottimo la divisione SSD/HD, per avere un indicazione quantitativa potremmo cercare il prezzo di un gb di SSD e di un gb di HD da una fonte affidabile, e pesare l'importanza delle dimensioni su questo indicatore, che ne dite?
+
+
 
 ```{r}
-data <- read.csv("Laptop2.csv")
+data <- read.csv("../data/Laptop2.csv")
 str(data)
 head(data)
 ```
@@ -116,7 +125,7 @@ R<-cor(var_numeric)
 R
 # Test di correlazione. (Spearsman's o Kendall tau)
 cor.test(var_numeric$Inches, var_numeric$Weight)
-corrgram(var_numeric)
+#corrgram(var_numeric)
 
 # Correlazione come grafo
 library(qgraph)
