@@ -1,0 +1,228 @@
+---
+title: "Progetto"
+author: "Andrea Corvaglia"
+date: "17 agosto 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+La Gpu con 112 livelli � inutilizzabile, possiamo dividere in integrata e dedicata, oppure dividere per le marche.
+Anche la memoria � problematica, ho gi� estratto la presenza o meno dell'SSD, ma bisogna pensare ad un modo di valutare la memoria.
+
+```{r}
+data <- read.csv("Laptop2.csv")
+str(data)
+head(data)
+```
+
+```{r}
+summary(data)
+```
+
+```{r}
+nums <- sapply(data, is.numeric)
+var_numeric <- data[,nums] 
+var_numeric
+```
+```{r}
+data$Weight<-as.numeric(data$Weight)
+data$Ram<-as.numeric(data$Ram)
+```
+
+```{r}
+sapply(data, function(x)(sum(is.na(x))))
+# Non ci sono missing data!
+```
+
+```{r}
+plot(data$Company,data$Price)
+```
+
+```{r}
+class(data$Ram)
+plot(density(data$Frequenza))
+
+hist(data$Price, breaks=25, probability=TRUE)
+lines(density(data$Price))
+```
+Descrittive variabile dipendente price
+```{r}
+library(psych)
+describe(data$Price)
+
+# NORMALITA'
+
+boxplot(data$Price)
+qqnorm(data$Price);qqline(data$Price)
+shapiro.test(data$Price)
+```
+
+
+T-test
+
+```{r}
+# One sample
+ref <- mean(data$Price)
+Apple<-data$Price[data$Company=="Apple"]
+t.test(Apple,mu=ref,alternative = "greater")
+# Wilcoxon Signed Rank Test
+wilcox.test(Apple, mu=ref, conf.int = TRUE)
+#Two sample
+Other <-data$Price[data$Company!="Apple"]
+wilcox.test(Apple, Other, alternative = "g")
+# F test sulla varianza
+var.test(Apple, Other, alternative = "two.sided")
+```
+
+
+
+
+
+Variabili qualitative: tabella di contingenza e chi quadro
+```{r}
+b<-data
+b.table<-table(b$SolidStateDisk,b$TypeName)
+b.table
+prop.table(b.table,2)
+# chi square test 
+
+chisq.test(b.table)
+
+chi=chisq.test(b.table)
+chi_norm=chi$statistic/(nrow(b)*min(nrow(b.table)-1,ncol(b.table)-1))
+chi_norm
+
+summary(b.table)
+
+```
+
+
+Correlazione per variabili quantitative
+
+```{r}
+# seleziona solo variabili quantitative
+nums <- sapply(data, is.numeric)
+var_numeric <- data[,nums] 
+head(var_numeric)
+var_numeric$X=NULL
+```
+
+```{r}
+# Matrice di correlazione
+R<-cor(var_numeric)            
+R
+# Test di correlazione. (Spearsman's o Kendall tau)
+cor.test(var_numeric$Inches, var_numeric$Weight)
+corrgram(var_numeric)
+
+# Correlazione come grafo
+library(qgraph)
+detcor=cor(as.matrix(var_numeric), method="pearson")
+round(detcor, 2)
+# plot corr matrix: green positive red negative 
+qgraph(detcor, shape="circle", posCol="darkgreen", negCol="darkred")
+
+```
+
+Boxplot di confronto (pre-anova)
+```{r}
+boxplot(data$Price~data$Company, 
+        main="Boxplot Prezzo per compagnia", 
+        col= rainbow(6), 
+        horizontal = F)
+boxplot(data$Price~data$SolidStateDisk, 
+        main="Prezzo vs ssd", 
+        col= rainbow(2), 
+        horizontal = F)
+```
+
+ANOVA
+
+A una via
+
+```{r}
+lmA = lm(Price ~ SolidStateDisk, data=data)
+summary(lmA)
+anova(lmA)
+
+lmB = lm(Price ~ Company, data=data)
+summary(lmB)
+anova(lmB)
+
+lmB = lm(Price ~ TypeName, data=data)
+summary(lmB)
+anova(lmB)
+
+```
+A due vie
+```{r}
+# Con interazione
+
+lmC = lm(Price ~ Company*TypeName  , data=data)
+drop1(lmC, test="F")
+summary(lmC)
+
+lmC = lm(Price ~ Company+TypeName  , data=data)
+# type I effects A, B/A   C/A,B  
+anova(lmC)
+# type III effects A/B,C , B/A,C   C/A,B
+drop1(lmC, test="F")
+summary(lmC)
+
+# contrasti
+library(lsmeans)
+ls=lsmeans(lmB,
+           pairwise ~ TypeName ,
+           adjust="tukey")
+ls$lsmeans
+# plot lsmeans and 95% confid int
+plot(ls$lsmeans, alpha = .05)
+# contrasts between predicted lsmeans
+ls$contrasts
+# if at least one contrast is significant, the variable
+# is significant in the anova table # drop1 effects
+
+# contrast among predicted lsmeans and overall lsmean
+c= contrast(ls, method = "eff")
+c
+library(coefplot)
+coefplot(lmB, intercept=FALSE)
+```
+ANOVA k way 
+```{r}
+lmK = lm(Price ~ Company+TypeName+SolidStateDisk  , data=data)
+summary(lmK)
+drop1(lmK, test="F") # type III SS
+coefplot(lmK, intercept=FALSE)
+```
+
+Regressione lineare
+```{r}
+lmA<-lm(Price ~ Frequenza  , data=data)
+summary(lmA)
+plot(data$Frequenza,data$Price)
+abline(lmA,col="red")
+
+lmA<-lm(Price ~ Frequenza+Pixel+Ram  , data=data)
+summary(lmA)
+coefplot(lmA, intercept=FALSE)
+
+```
+ANCOVA
+
+```{r}
+lmK = lm(Price ~ Company+TypeName+SolidStateDisk+ Frequenza+Pixel+Ram  , data=data)
+summary(lmK)
+drop1(lmK, .~., test="F")
+
+ls=lsmeans(lmK,
+           pairwise ~ Company ,
+           adjust="tukey")
+c= contrast(ls, method = "eff")
+c
+```
+
+
