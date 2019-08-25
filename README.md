@@ -14,7 +14,7 @@ A) choose a dataset with continuous dependent var Y and mixed (categorical /quan
 - Anova two way Y = Xj Xk for some categorical X 
 - Ancova Y = all covariates (qualitative +quantitative) 
 
-Do A) e B) and PRINT main outputs for discussion (test, figures, parameters, p-value, fit, error, OR, lsmeans, LRT, normality tests,..) the day of the oral. 
+Do A) and PRINT main outputs for discussion (test, figures, parameters, p-value, fit, error, OR, lsmeans, LRT, normality tests,..) the day of the oral. 
  
 For the exam, please…prepare yourself to discuss and illustrate: 
  
