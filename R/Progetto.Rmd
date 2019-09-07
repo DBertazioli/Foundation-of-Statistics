@@ -34,7 +34,7 @@ summary(data)
 ```{r}
 nums <- sapply(data, is.numeric)
 var_numeric <- data[,nums] 
-var_numeric
+head(var_numeric)
 ```
 ```{r}
 data$Weight<-as.numeric(data$Weight)
@@ -54,10 +54,128 @@ plot(data$Company,data$Price)
 class(data$Ram)
 plot(density(data$Frequenza))
 
-hist(data$Price, breaks=25, probability=TRUE)
-lines(density(data$Price))
+#hist(data$Price, breaks=25, probability=TRUE)
+#lines(density(data$Price))
 ```
+
+
+```{r}
+library(ggplot2)
+ggplot(data,aes(x = Price)) + 
+        geom_histogram(aes(y =..density..),
+                       bins= 25,
+                       fill = "grey",
+                       color ="black") +
+        geom_vline(xintercept = quantile(data$Price, 0.50), color = "dark red", lty = 2) +
+        geom_vline(xintercept = mean(data$Price), color = "dark blue", lty = 2) +
+        labs(x = "Price", y ="Density") +
+        ggtitle("Price Distribution with mean and median") +
+          geom_density()
+
+```
+
+Quite skewed to the right, mean > media
+
+We could try to apply a correction like Log(Y)
+
+```{r}
+
+data$LogPrice=log(data$Price)
+ggplot(data,aes(x = log(Price))) + 
+        geom_histogram(aes(y =..density..),
+                       bins= 25,
+                       fill = "grey",
+                       color ="black") +
+        geom_vline(xintercept = quantile(data$LogPrice, 0.50), color = "dark red", lty = 2) +
+        geom_vline(xintercept = mean(data$LogPrice), color = "dark blue", lty = 2) +
+        labs(x = "log(Price)", y ="Density") +
+        ggtitle("log(Price) Distribution with mean and median")+  geom_density()
+```
+
+Now the distribution is looking a bit better (as regards normality)
+
+```{r}
+ggplot(data,aes(x = Price)) + 
+        geom_histogram(aes(y =..density..),
+                       bins= 25,
+                       fill = "grey",
+                       color ="black") +
+        geom_vline(xintercept = mean(data$Price), color = "dark red") +
+        geom_vline(xintercept = mean(data$Price) + sd(data$Price), color = "dark red", lty = 2) +
+        geom_vline(xintercept = mean(data$Price) - sd(data$Price), color = "dark red", lty = 2) +
+        labs(x = "Price", y ="Density") +
+        ggtitle("Price Distribution (mean +/- sd)") +
+          geom_density()
+
+```{r}
+ggplot(data,aes(x = log(Price))) + 
+        geom_histogram(aes(y =..density..),
+                       bins= 25,
+                       fill = "grey",
+                       color ="black") +
+        geom_vline(xintercept = mean(data$LogPrice), color = "dark red") +
+        geom_vline(xintercept = mean(data$LogPrice) + sd(data$LogPrice), color = "dark red", lty = 2) +
+        geom_vline(xintercept = mean(data$LogPrice) - sd(data$LogPrice), color = "dark red", lty = 2) +
+        labs(x = "log(Price)", y ="Density") +
+        ggtitle("log(Price) Distribution (mean +/- sd)") +
+          geom_density()
+
+```
+
+
+```{r}
+ggplot(data,aes(x = Price)) + 
+        geom_histogram(aes(y =..density..),
+                       bins= 25,
+                       fill = "grey",
+                       color ="black") +
+        geom_vline(xintercept = quantile(data$Price, 0.25), color = "dark red",lty = 2) +
+        geom_vline(xintercept = quantile(data$Price, 0.5), color = "dark red", ) +
+        geom_vline(xintercept = quantile(data$Price, 0.75), color = "dark red", lty = 2) +
+        labs(x = "Price", y ="Density") +
+        ggtitle("Price Distribution (quartiles)") +
+          geom_density()
+
+ggplot(data,aes(x = log(Price))) + 
+        geom_histogram(aes(y =..density..),
+                       bins= 25,
+                       fill = "grey",
+                       color ="black") +
+        geom_vline(xintercept = quantile(data$LogPrice, 0.25), color = "dark red",lty = 2) +
+        geom_vline(xintercept = quantile(data$LogPrice, 0.5), color = "dark red", ) +
+        geom_vline(xintercept = quantile(data$LogPrice, 0.75), color = "dark red", lty = 2) +
+           labs(x = "log(Price)", y ="Density") +
+        ggtitle("log(Price) Distribution (quartiles)") +
+          geom_density()
+```
+
+
+
 Descrittive variabile dipendente price
+
+```{r}
+ggplot(data, aes(x = Price, fill = TypeName)) + 
+        geom_density(size = 0.6, alpha = .3) +
+        labs(x = "Price", y ="Density", fill = "TypeName") +
+        ggtitle("Price Density Distribution For TypeName") 
+
+ggplot(data, aes(x = log(Price), fill = TypeName)) + 
+        geom_density(size = 0.6, alpha = .3) +
+        labs(x = "log(Price)", y ="Density", fill = "TypeName") +
+        ggtitle("log(Price) Density Distribution For TypeName") 
+
+ggplot(data, aes(x = Price, fill = SolidStateDisk)) + 
+        geom_density(size = 0.6, alpha = .3) +
+        labs(x = "Price", y ="Density", fill = "SolidStateDisk") +
+        ggtitle("Price Density Distribution For SolidStateDisk") 
+
+ggplot(data, aes(x = log(Price), fill = SolidStateDisk)) + 
+        geom_density(size = 0.6, alpha = .3) +
+        labs(x = "log(Price)", y ="Density", fill = "SolidStateDisk") +
+        ggtitle("log(Price) Density Distribution For SolidStateDisk") 
+
+```
+
 ```{r}
 library(psych)
 describe(data$Price)
@@ -67,6 +185,25 @@ describe(data$Price)
 boxplot(data$Price)
 qqnorm(data$Price);qqline(data$Price)
 shapiro.test(data$Price)
+ad.test(data$Price)
+
+#wilcox.test(data$Price, conf.int = TRUE, mu = ) #worth it?
+if(!require(Envstats)) install.packages("EnvStats")
+library(EnvStats)
+
+VarTest(sample(data$Price), sigma.squared = (sd(data$Price)*sd(data$Price)))
+```
+
+Trying with the log correction:
+
+```{r}
+# Correzione NORMALITA'
+library(nortest)
+boxplot(data$LogPrice)
+qqnorm(data$LogPrice);qqline(data$LogPrice)
+shapiro.test(data$LogPrice) #better than before, but still not normal according to shapiro
+
+ad.test(data$LogPrice)
 ```
 
 
@@ -155,21 +292,85 @@ A una via
 ```{r}
 lmA = lm(Price ~ SolidStateDisk, data=data)
 summary(lmA)
+drop1(lmA, test = 'F')
 anova(lmA)
 
+library(lsmeans)
+ls_SolidStateDisk = lsmeans(lmA,pairwise ~ SolidStateDisk,adjust = 'tukey')
+ls_SolidStateDisk$contrasts 
+ls_SolidStateDisk$lsmeans
+plot(ls_SolidStateDisk$lsmeans, alpha = .05)
+```
+
+```{r}
 lmB = lm(Price ~ Company, data=data)
 summary(lmB)
+drop1(lmB, test = 'F')
 anova(lmB)
 
-lmB = lm(Price ~ TypeName, data=data)
-summary(lmB)
-anova(lmB)
-
+ls_Company = lsmeans(lmB,pairwise ~ Company,adjust = 'tukey')
+ls_Company$contrasts 
+ls_Company$lsmeans
+plot(ls_Company$lsmeans, alpha = .05)
 ```
+
+```{r}
+lmC = lm(Price ~ TypeName, data=data)
+summary(lmC)
+drop1(lmC, test = 'F')
+anova(lmC)
+
+ls_TypeName = lsmeans(lmC,pairwise ~ TypeName,adjust = 'tukey')
+ls_TypeName$contrasts 
+ls_TypeName$lsmeans
+plot(ls_TypeName$lsmeans, alpha = .05)
+
+
+library(coefplot)
+#library(forestmodel)
+coefplot(lmC, intercept = FALSE)
+
+par(mfrow = c(2,2))
+plot(lmC)
+
+#(not) normal distribution of residuals
+par(mfrow=c(1,2))
+boxplot(lmC$residuals)
+qqnorm(lmC$residuals);qqline(lmC$residuals)
+
+ad.test(lmC$residuals)
+shapiro.test(lmC$residuals)
+
+#let's try again with the log correction
+lmC_log = lm(log(Price) ~ TypeName, data=data)
+summary(lmC_log)#R^2 increases
+drop1(lmC_log, test = 'F')
+anova(lmC_log)
+
+ls_TypeName_log = lsmeans(lmC_log,pairwise ~ TypeName,adjust = 'tukey')
+ls_TypeName_log$contrasts 
+ls_TypeName_log$lsmeans
+plot(ls_TypeName_log$lsmeans, alpha = .05)
+
+
+coefplot(lmC_log, intercept = FALSE)
+
+par(mfrow = c(2,2))
+plot(lmC_log)
+
+#(not) normal distribution of residuals
+par(mfrow=c(1,2))
+boxplot(lmC_log$residuals)
+qqnorm(lmC_log$residuals);qqline(lmC_log$residuals)
+
+ad.test(lmC_log$residuals) #normal now!
+shapiro.test(lmC_log$residuals) #borderline now!
+```
+
+
 A due vie
 ```{r}
 # Con interazione
-
 lmC = lm(Price ~ Company*TypeName  , data=data)
 drop1(lmC, test="F")
 summary(lmC)
@@ -234,4 +435,46 @@ c= contrast(ls, method = "eff")
 c
 ```
 
+```{r}
+lm_full = lm(Price ~ ., data = data)
+summary(lm_full)
+anova(lm_full, test="F")
+drop1(lm_full, test="F")
+
+#coefplot(lm_full, intercept=FALSE) #meglio di no ahah
+
+par(mfrow=c(2,2))
+plot(lm_full)
+
+par(mfrow=c(1,1))
+par(mfrow=c(1,2))
+boxplot(lm_full$residuals)
+qqnorm(lm_full$residuals);qqline(lm_full$residuals) # probably the correction would work pretty fine here
+```
+
+```{r}
+#tests
+ad.test(lm_full$residuals)
+shapiro.test(lm_full$residuals)
+```
+
+```{r}
+library(MASS)
+boxcoxreg1<-boxcox(lm_full)
+which.max(boxcoxreg1$y)
+
+lambda=boxcoxreg1$x[which.max(boxcoxreg1$y)]
+lambda
+
+lm_full_t = lm(log(Price) ~ ., data = data)
+
+par(mfrow=c(2,2))
+plot(lm_full_t) #quite better
+
+ad.test(lm_full_t$residuals) #not really
+shapiro.test(lm_full_t$residuals)  #not really
+
+library(car)
+influencePlot(lm_full,main="Influence Plot", sub="Circle size is proportial to Cook's Distance" )
+```
 
