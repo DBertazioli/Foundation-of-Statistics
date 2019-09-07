@@ -1,12 +1,12 @@
 ---
 title: "Progetto"
-author: "Andrea Corvaglia"
+author: "Andrea Corvaglia at All"
 date: "17 agosto 2019"
 output:
+  pdf_document: 
+    toc: True
   html_document: 
     toc: True
-  pdf_document: 
-    toc:True
 ---
 
 ```{r setup, include=FALSE}
@@ -183,8 +183,7 @@ ad.test(data$Price)
 
 #wilcox.test(data$Price, conf.int = TRUE, mu = ) #worth it?
 #if(!require(Envstats)) install.packages("EnvStats")
-library(EnvStats)
-varTest(sample(data$Price), sigma.squared = (sd(data$Price)*sd(data$Price)))
+
 ```
 
 Trying with the log correction:
@@ -199,6 +198,7 @@ shapiro.test(data$LogPrice) #better than before, but still not normal according 
 ad.test(data$LogPrice)
 ```
 
+# Test on a mean (justify H0) on Y and confidence limits.
 
 T-test
 
@@ -209,6 +209,15 @@ Apple<-data$Price[data$Company=="Apple"]
 t.test(Apple,mu=ref,alternative = "greater")
 # Wilcoxon Signed Rank Test
 wilcox.test(Apple, mu=ref, conf.int = TRUE)
+
+#FIXME: var test?
+library(EnvStats)
+varTest(sample(data$Price), sigma.squared = (sd(data$Price)*sd(data$Price)))
+```
+
+# Test two means, two variances (Y vs X) .
+
+```{r}
 #Two sample
 Other <-data$Price[data$Company!="Apple"]
 wilcox.test(Apple, Other, alternative = "g")
@@ -217,7 +226,7 @@ var.test(Apple, Other, alternative = "two.sided")
 ```
 
 
-
+# Association/chi square among some couples of categorical Xj
 
 
 Variabili qualitative: tabella di contingenza e chi quadro
@@ -278,7 +287,7 @@ boxplot(data$Price~data$SolidStateDisk,
         horizontal = F)
 ```
 
-ANOVA
+# Anova one way Y = Xj, for a categorical X
 
 A una via
 
@@ -377,6 +386,7 @@ ad.test(lmC_log$residuals) #normal now!
 shapiro.test(lmC_log$residuals) #borderline now!
 ```
 
+# Anova two way Y = Xj Xk for some categorical X
 
 A due vie
 ```{r}
@@ -431,7 +441,8 @@ summary(lmA)
 coefplot(lmA, intercept=FALSE)
 
 ```
-ANCOVA
+
+# Ancova Y = all covariates (qualitative +quantitative)
 
 ```{r}
 lmK = lm(Price ~ Company+TypeName+SolidStateDisk+ Frequenza+Pixel+Ram  , data=data)
