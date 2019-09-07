@@ -473,8 +473,46 @@ plot(lm_full_t) #quite better
 
 ad.test(lm_full_t$residuals) #not really
 shapiro.test(lm_full_t$residuals)  #not really
+```
 
+A look over outliers
+
+```{r}
 library(car)
 influencePlot(lm_full,main="Influence Plot", sub="Circle size is proportial to Cook's Distance" )
+
+#Cook's Distance
+cooksd <- cooks.distance(lm_full_t)
+cooksda=data.frame(cooksd)
+summary(cooksd)
+
+# identify D values > 4/(n-k-1)
+# Cook's D plot
+cutoff <- 4/((nrow(data)-length(lm_full_t$coefficients)-2))
+plot(lm_full_t, which=4, cook.levels=cutoff)
+
+
+plot(cooksd, pch="*", cex=1, main="Influential Obs by Cooks distance") # plot cook's distance
+abline(h = cutoff, col="red") # add cutoff line
+text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4*mean(cooksd, na.rm=T),names(cooksd),""),
+col="red")#add labels
+
+#extract influencial obs
+influential <- as.numeric(names(cooksd)[(cooksd > cutoff)]) # influential row numbers
+influ=data.frame(data[cooksd > cutoff, ])
+filtered_data <- data[ !(row.names(data) %in% c(influential)), ]
+#Outlier rimossi
+lm_full_t_no_OUTliers = lm(log(Price) ~ ., data = filtered_data)
+par(mfrow=c(2,2))
+plot(lm_full_t_no_OUTliers)
+
+summary(lm_full_t_no_OUTliers) #interessante R^2=1, levare un po' di roba se no Lovaglio ci uccide
+ncvTest(lm_full_t_no_OUTliers)
+```
+```{r}
+null = lm(log(Price) ~ 1, data = filtered_data)
+full = lm(log(Price) ~ ., data = filtered_data)
+lm_fit = stepAIC(null, scope = list(upper = full), direction = "both", trace = FALSE)
+drop1(lm_fit, test = 'F')
 ```
 
