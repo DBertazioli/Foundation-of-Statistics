@@ -2,7 +2,9 @@
 title: "Progetto"
 author: "Andrea Corvaglia"
 date: "17 agosto 2019"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -10,12 +12,12 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 ## TO DO:
 
->La Gpu con 112 livelli � inutilizzabile, possiamo dividere in integrata e dedicata, oppure dividere per le marche.
+>La Gpu con 112 livelli è inutilizzabile, possiamo dividere in integrata e dedicata, oppure dividere per le marche.
 
 >> @Dario: Per la gpu farei innanzitutto una divisione tra integrata e dedicata, e tra quelle dedicate le suddividerei per VRAM (inizialmente pensavo di cercare dei prezzi per avere una stima quantitativa di quanto valga la gpu dedicata, però bisognerebbe cercare prezzi medi e visto che i modelli son tanti mi pare troppo lavoro e non chissà quanto significativo)
 
 
->Anche la memoria � problematica, ho gi� estratto la presenza o meno dell'SSD, ma bisogna pensare ad un modo di valutare la memoria.
+>Anche la memoria è problematica, ho già estratto la presenza o meno dell'SSD, ma bisogna pensare ad un modo di valutare la memoria.
 
 >> @Dario: ottimo la divisione SSD/HD, per avere un indicazione quantitativa potremmo cercare il prezzo di un gb di SSD e di un gb di HD da una fonte affidabile, e pesare l'importanza delle dimensioni su questo indicatore, che ne dite?
 
@@ -308,7 +310,7 @@ drop1(lmB, test = 'F')
 anova(lmB)
 
 ls_Company = lsmeans(lmB,pairwise ~ Company,adjust = 'tukey')
-ls_Company$contrasts 
+#ls_Company$contrasts #too long to be printed
 ls_Company$lsmeans
 plot(ls_Company$lsmeans, alpha = .05)
 ```
@@ -372,7 +374,7 @@ A due vie
 # Con interazione
 lmC = lm(Price ~ Company*TypeName  , data=data)
 drop1(lmC, test="F")
-summary(lmC)
+#summary(lmC) #FIXME: too long to be printed
 
 lmC = lm(Price ~ Company+TypeName  , data=data)
 # type I effects A, B/A   C/A,B  
@@ -431,12 +433,17 @@ ls=lsmeans(lmK,
            pairwise ~ Company ,
            adjust="tukey")
 c= contrast(ls, method = "eff")
-c
+#c #FIXME: too long to be printed
 ```
 
 ```{r}
+
+data$LogPrice=NULL
+data$Product=NULL
+data$X=NULL
+str(data)
 lm_full = lm(Price ~ ., data = data)
-summary(lm_full)
+#summary(lm_full) #FIXME: wayyy too long to be printed, R^2 =0.9586
 anova(lm_full, test="F")
 drop1(lm_full, test="F")
 
@@ -505,7 +512,7 @@ lm_full_t_no_OUTliers = lm(log(Price) ~ ., data = filtered_data)
 par(mfrow=c(2,2))
 plot(lm_full_t_no_OUTliers)
 
-summary(lm_full_t_no_OUTliers) #interessante R^2=1, levare un po' di roba se no Lovaglio ci uccide
+#summary(lm_full_t_no_OUTliers) #FIXME: too long to be printed, R^2=0.9727
 ncvTest(lm_full_t_no_OUTliers)
 ```
 ```{r}
