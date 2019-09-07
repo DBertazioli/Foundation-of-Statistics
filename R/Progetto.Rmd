@@ -3,25 +3,17 @@ title: "Progetto"
 author: "Andrea Corvaglia"
 date: "17 agosto 2019"
 output:
-  html_document: default
-  pdf_document: default
+  html_document: 
+    toc: True
+  pdf_document: 
+    toc:True
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-## TO DO:
 
->La Gpu con 112 livelli è inutilizzabile, possiamo dividere in integrata e dedicata, oppure dividere per le marche.
-
->> @Dario: Per la gpu farei innanzitutto una divisione tra integrata e dedicata, e tra quelle dedicate le suddividerei per VRAM (inizialmente pensavo di cercare dei prezzi per avere una stima quantitativa di quanto valga la gpu dedicata, però bisognerebbe cercare prezzi medi e visto che i modelli son tanti mi pare troppo lavoro e non chissà quanto significativo)
-
-
->Anche la memoria è problematica, ho già estratto la presenza o meno dell'SSD, ma bisogna pensare ad un modo di valutare la memoria.
-
->> @Dario: ottimo la divisione SSD/HD, per avere un indicazione quantitativa potremmo cercare il prezzo di un gb di SSD e di un gb di HD da una fonte affidabile, e pesare l'importanza delle dimensioni su questo indicatore, che ne dite?
-
-
+# Descriptive analysis on Y
 
 ```{r}
 data <- read.csv("../data/Laptop2.csv")
@@ -302,6 +294,23 @@ ls_SolidStateDisk$contrasts
 ls_SolidStateDisk$lsmeans
 plot(ls_SolidStateDisk$lsmeans, alpha = .05)
 ```
+
+```{r}
+str(data)
+lm_gpu_test=lm(Price~GpuCompany, data = data) #just a try
+summary(lm_gpu_test)
+drop1(lm_gpu_test, test = 'F')
+anova(lm_gpu_test)
+
+summary(data$dedicated_GPU)
+lm_gpu_test=lm(Price~dedicated_GPU, data = data) #FIXME: seems not really worth it
+summary(lm_gpu_test)
+drop1(lm_gpu_test, test = 'F')
+anova(lm_gpu_test)
+
+
+```
+
 
 ```{r}
 lmB = lm(Price ~ Company, data=data)
