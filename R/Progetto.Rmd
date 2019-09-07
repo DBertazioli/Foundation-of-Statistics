@@ -3,14 +3,18 @@ title: "Progetto"
 author: "Andrea Corvaglia at All"
 date: "17 agosto 2019"
 output:
-  pdf_document: 
-    toc: True
-  html_document: 
-    toc: True
+  html_document:
+    fig_height: 3
+    fig_width: 4.5
+    toc: yes
+  pdf_document:
+    fig_height: 3
+    fig_width: 4.5
+    toc: yes
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE, fig.align="center")
 ```
 
 # Descriptive analysis on Y
@@ -68,7 +72,7 @@ ggplot(data,aes(x = Price)) +
 
 ```
 
-Quite skewed to the right, mean > media
+Quite skewed to the right, mean > median
 
 We could try to apply a correction like Log(Y)
 
@@ -327,13 +331,26 @@ summary(lmB)
 drop1(lmB, test = 'F')
 anova(lmB)
 
+library(lsmeans)
 ls_Company = lsmeans(lmB,pairwise ~ Company,adjust = 'tukey')
-#ls_Company$contrasts #too long to be printed
-ls_Company$lsmeans
+#ls_Company$contrasts #FIXME: too long to be printed
+#ls_Company$lsmeans #mFIXME: aybe only the plot is enough?
 plot(ls_Company$lsmeans, alpha = .05)
+
+lmB_agg = lm(Price ~ Aggregated_Company, data=data) #seems to be fine
+summary(lmB_agg)
+drop1(lmB_agg, test = 'F')
+anova(lmB_agg)
+
+ls_Company_agg = lsmeans(lmB_agg,pairwise ~ Aggregated_Company,adjust = 'tukey')
+#ls_Company_agg$contrasts #FIXME: too long to be printed
+#ls_Company_agg$lsmeans #mFIXME: aybe only the plot is enough?
+plot(ls_Company_agg$lsmeans, alpha = .05) #i guess from here seems fine to leave "Razer" alone?
+
+
 ```
 
-```{r}
+```{r, fig.height=4, fig.width=6}
 lmC = lm(Price ~ TypeName, data=data)
 summary(lmC)
 drop1(lmC, test = 'F')
@@ -456,7 +473,7 @@ c= contrast(ls, method = "eff")
 #c #FIXME: too long to be printed
 ```
 
-```{r}
+```{r, fig.height=4, fig.width=6}
 
 data$LogPrice=NULL
 data$Product=NULL
@@ -484,13 +501,14 @@ ad.test(lm_full$residuals)
 shapiro.test(lm_full$residuals)
 ```
 
-```{r}
+```{r, fig.height=4, fig.width=6}
 library(MASS)
-boxcoxreg1<-boxcox(lm_full)
+#to justify log correction
+boxcoxreg1<-boxcox(lm_full, plotit=T)
 which.max(boxcoxreg1$y)
 
 lambda=boxcoxreg1$x[which.max(boxcoxreg1$y)]
-lambda
+lambda #FIXME: not really 0, one should actually apply (((y  )^lambda) - 1) / lambda but meh
 
 lm_full_t = lm(log(Price) ~ ., data = data)
 
@@ -503,7 +521,7 @@ shapiro.test(lm_full_t$residuals)  #not really
 
 A look over outliers
 
-```{r}
+```{r, fig.height=4, fig.width=6}
 library(car)
 influencePlot(lm_full,main="Influence Plot", sub="Circle size is proportial to Cook's Distance" )
 
