@@ -179,7 +179,7 @@ ggplot(data, aes(x = log(Price), fill = SolidStateDisk)) +
 ```{r}
 library(psych)
 describe(data$Price)
-
+library(nortest)
 # NORMALITA'
 
 boxplot(data$Price)
@@ -188,10 +188,9 @@ shapiro.test(data$Price)
 ad.test(data$Price)
 
 #wilcox.test(data$Price, conf.int = TRUE, mu = ) #worth it?
-if(!require(Envstats)) install.packages("EnvStats")
+#if(!require(Envstats)) install.packages("EnvStats")
 library(EnvStats)
-
-VarTest(sample(data$Price), sigma.squared = (sd(data$Price)*sd(data$Price)))
+varTest(sample(data$Price), sigma.squared = (sd(data$Price)*sd(data$Price)))
 ```
 
 Trying with the log correction:
@@ -384,7 +383,7 @@ summary(lmC)
 
 # contrasti
 library(lsmeans)
-ls=lsmeans(lmB,
+ls=lsmeans(lmC, #FIXME: @Andrea, c'era lmB ma credo tu volessi scrivere lmC, in case check it
            pairwise ~ TypeName ,
            adjust="tukey")
 ls$lsmeans
@@ -399,7 +398,7 @@ ls$contrasts
 c= contrast(ls, method = "eff")
 c
 library(coefplot)
-coefplot(lmB, intercept=FALSE)
+coefplot(lmC, intercept=FALSE) #FIXME: @Andrea, same goes here
 ```
 ANOVA k way 
 ```{r}
