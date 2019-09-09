@@ -2,14 +2,15 @@
 title: "Progetto"
 author: "Andrea Corvaglia at All"
 date: "17 agosto 2019"
+geometry: margin=2cm
 output:
-  html_document:
-    fig_height: 3
-    fig_width: 4.5
-    toc: yes
   pdf_document:
     fig_height: 3
-    fig_width: 4.5
+    fig_width: 5
+    toc: yes
+  html_document:
+    fig_height: 3
+    fig_width: 5
     toc: yes
 ---
 
@@ -18,11 +19,11 @@ knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE, fig.align="cent
 ```
 
 # Descriptive analysis on Y
-
+\small
 ```{r}
 data <- read.csv("../data/Laptop2.csv")
 str(data)
-head(data)
+head(data,3)
 ```
 
 ```{r}
@@ -34,117 +35,50 @@ nums <- sapply(data, is.numeric)
 var_numeric <- data[,nums] 
 head(var_numeric)
 ```
-```{r}
-data$Weight<-as.numeric(data$Weight)
-data$Ram<-as.numeric(data$Ram)
-```
 
 ```{r}
-sapply(data, function(x)(sum(is.na(x))))
-# Non ci sono missing data!
+sapply(data, function(x)(sum(is.na(x)))) # Non ci sono missing data!
 ```
 
-```{r}
-plot(data$Company,data$Price)
+```{r, fig.height=3.5, fig.width=10}
+plot(data$Aggregated_Company,data$Price)
 ```
-
-```{r}
-class(data$Ram)
-plot(density(data$Frequenza))
-
-#hist(data$Price, breaks=25, probability=TRUE)
-#lines(density(data$Price))
-```
-
 
 ```{r}
 library(ggplot2)
-ggplot(data,aes(x = Price)) + 
-        geom_histogram(aes(y =..density..),
-                       bins= 25,
-                       fill = "grey",
-                       color ="black") +
-        geom_vline(xintercept = quantile(data$Price, 0.50), color = "dark red", lty = 2) +
-        geom_vline(xintercept = mean(data$Price), color = "dark blue", lty = 2) +
-        labs(x = "Price", y ="Density") +
-        ggtitle("Price Distribution with mean and median") +
-          geom_density()
-
+ggplot(data,aes(x = Price)) + geom_histogram(aes(y =..density..), bins= 25, fill = "grey",color ="black") +
+        geom_vline(xintercept = quantile(data$Price, 0.50), color = "dark red", lty = 2) +geom_vline(xintercept = mean(data$Price), color = "dark blue", lty = 2) +
+        labs(x = "Price", y ="Density") + ggtitle("Price Distribution with mean and median") +geom_density()
 ```
 
-Quite skewed to the right, mean > median
-
-We could try to apply a correction like Log(Y)
+Quite skewed to the right, mean > median: we could try to apply a correction like Log(Y)
 
 ```{r}
-
-data$LogPrice=log(data$Price)
-ggplot(data,aes(x = log(Price))) + 
-        geom_histogram(aes(y =..density..),
-                       bins= 25,
-                       fill = "grey",
-                       color ="black") +
-        geom_vline(xintercept = quantile(data$LogPrice, 0.50), color = "dark red", lty = 2) +
-        geom_vline(xintercept = mean(data$LogPrice), color = "dark blue", lty = 2) +
-        labs(x = "log(Price)", y ="Density") +
-        ggtitle("log(Price) Distribution with mean and median")+  geom_density()
+ggplot(data,aes(x = log(Price))) + geom_histogram(aes(y =..density..),bins= 25, fill = "grey", color ="black") + 
+  geom_vline(xintercept = quantile(log(data$Price), 0.50), color = "dark red", lty = 2) + geom_vline(xintercept = mean(log(data$Price)), color = "dark blue", lty = 2) +
+  labs(x = "log(Price)", y ="Density") +ggtitle("log(Price) Distribution with mean and median")+  geom_density()
 ```
 
 Now the distribution is looking a bit better (as regards normality)
 
 ```{r}
-ggplot(data,aes(x = Price)) + 
-        geom_histogram(aes(y =..density..),
-                       bins= 25,
-                       fill = "grey",
-                       color ="black") +
-        geom_vline(xintercept = mean(data$Price), color = "dark red") +
-        geom_vline(xintercept = mean(data$Price) + sd(data$Price), color = "dark red", lty = 2) +
-        geom_vline(xintercept = mean(data$Price) - sd(data$Price), color = "dark red", lty = 2) +
-        labs(x = "Price", y ="Density") +
-        ggtitle("Price Distribution (mean +/- sd)") +
-          geom_density()
+ggplot(data,aes(x = Price)) + geom_histogram(aes(y =..density..), bins= 25, fill = "grey", color ="black") +
+  geom_vline(xintercept = mean(data$Price), color = "dark red") + geom_vline(xintercept = mean(data$Price) + sd(data$Price), color = "dark red", lty = 2) +
+  geom_vline(xintercept = mean(data$Price) - sd(data$Price), color = "dark red", lty = 2) +labs(x = "Price", y ="Density") + ggtitle("Price Distribution (mean +/- sd)") + geom_density()
 
-```{r}
-ggplot(data,aes(x = log(Price))) + 
-        geom_histogram(aes(y =..density..),
-                       bins= 25,
-                       fill = "grey",
-                       color ="black") +
-        geom_vline(xintercept = mean(data$LogPrice), color = "dark red") +
-        geom_vline(xintercept = mean(data$LogPrice) + sd(data$LogPrice), color = "dark red", lty = 2) +
-        geom_vline(xintercept = mean(data$LogPrice) - sd(data$LogPrice), color = "dark red", lty = 2) +
-        labs(x = "log(Price)", y ="Density") +
-        ggtitle("log(Price) Distribution (mean +/- sd)") +
-          geom_density()
-
+ggplot(data,aes(x = log(Price))) +geom_histogram(aes(y =..density..), bins= 25,fill = "grey",color ="black") +
+  geom_vline(xintercept = mean(log(data$Price)), color = "dark red") + geom_vline(xintercept = mean(log(data$Price)) + sd(log(data$Price)), color = "dark red", lty = 2) +
+  geom_vline(xintercept = mean(log(data$Price)) - sd(log(data$Price)), color = "dark red", lty = 2) + labs(x = "log(Price)", y ="Density") + ggtitle("log(Price) Distribution (mean +/- sd)") + geom_density()
 ```
 
-
 ```{r}
-ggplot(data,aes(x = Price)) + 
-        geom_histogram(aes(y =..density..),
-                       bins= 25,
-                       fill = "grey",
-                       color ="black") +
-        geom_vline(xintercept = quantile(data$Price, 0.25), color = "dark red",lty = 2) +
-        geom_vline(xintercept = quantile(data$Price, 0.5), color = "dark red", ) +
-        geom_vline(xintercept = quantile(data$Price, 0.75), color = "dark red", lty = 2) +
-        labs(x = "Price", y ="Density") +
-        ggtitle("Price Distribution (quartiles)") +
-          geom_density()
+ggplot(data,aes(x = Price)) + geom_histogram(aes(y =..density..), bins= 25, fill = "grey", color ="black") + 
+  geom_vline(xintercept = quantile(data$Price, 0.25), color = "dark red",lty = 2) + geom_vline(xintercept = quantile(data$Price, 0.5), color = "dark red", ) +
+  geom_vline(xintercept = quantile(data$Price, 0.75), color = "dark red", lty = 2) + labs(x = "Price", y ="Density") + ggtitle("Price Distribution (quartiles)") + geom_density()
 
-ggplot(data,aes(x = log(Price))) + 
-        geom_histogram(aes(y =..density..),
-                       bins= 25,
-                       fill = "grey",
-                       color ="black") +
-        geom_vline(xintercept = quantile(data$LogPrice, 0.25), color = "dark red",lty = 2) +
-        geom_vline(xintercept = quantile(data$LogPrice, 0.5), color = "dark red", ) +
-        geom_vline(xintercept = quantile(data$LogPrice, 0.75), color = "dark red", lty = 2) +
-           labs(x = "log(Price)", y ="Density") +
-        ggtitle("log(Price) Distribution (quartiles)") +
-          geom_density()
+ggplot(data,aes(x = log(Price))) + geom_histogram(aes(y =..density..), bins= 25, fill = "grey", color ="black") +
+  geom_vline(xintercept = quantile(log(data$Price), 0.25), color = "dark red",lty = 2) + geom_vline(xintercept = quantile(log(data$Price), 0.5), color = "dark red", ) +
+  geom_vline(xintercept = quantile(log(data$Price), 0.75), color = "dark red", lty = 2) + labs(x = "log(Price)", y ="Density") + ggtitle("log(Price) Distribution (quartiles)") + geom_density()
 ```
 
 
@@ -152,42 +86,25 @@ ggplot(data,aes(x = log(Price))) +
 Descrittive variabile dipendente price
 
 ```{r}
-ggplot(data, aes(x = Price, fill = TypeName)) + 
-        geom_density(size = 0.6, alpha = .3) +
-        labs(x = "Price", y ="Density", fill = "TypeName") +
-        ggtitle("Price Density Distribution For TypeName") 
+ggplot(data, aes(x = Price, fill = TypeName)) + geom_density(size = 0.6, alpha = .3) + labs(x = "Price", y ="Density", fill = "TypeName") + ggtitle("Price Density Distribution For TypeName") 
 
-ggplot(data, aes(x = log(Price), fill = TypeName)) + 
-        geom_density(size = 0.6, alpha = .3) +
-        labs(x = "log(Price)", y ="Density", fill = "TypeName") +
-        ggtitle("log(Price) Density Distribution For TypeName") 
+ggplot(data, aes(x = log(Price), fill = TypeName)) + geom_density(size = 0.6, alpha = .3) +labs(x = "log(Price)", y ="Density", fill = "TypeName") + ggtitle("log(Price) Density Distribution For TypeName") 
 
-ggplot(data, aes(x = Price, fill = SolidStateDisk)) + 
-        geom_density(size = 0.6, alpha = .3) +
-        labs(x = "Price", y ="Density", fill = "SolidStateDisk") +
-        ggtitle("Price Density Distribution For SolidStateDisk") 
+ggplot(data, aes(x = Price, fill = SolidStateDisk)) + geom_density(size = 0.6, alpha = .3) +labs(x = "Price", y ="Density", fill = "SolidStateDisk") + ggtitle("Price Density Distribution For SolidStateDisk") 
 
-ggplot(data, aes(x = log(Price), fill = SolidStateDisk)) + 
-        geom_density(size = 0.6, alpha = .3) +
-        labs(x = "log(Price)", y ="Density", fill = "SolidStateDisk") +
-        ggtitle("log(Price) Density Distribution For SolidStateDisk") 
-
+ggplot(data, aes(x = log(Price), fill = SolidStateDisk)) + geom_density(size = 0.6, alpha = .3) + labs(x = "log(Price)", y ="Density", fill = "SolidStateDisk") + ggtitle("log(Price) Density Distribution For SolidStateDisk") 
 ```
 
 ```{r}
 library(psych)
 describe(data$Price)
-library(nortest)
-# NORMALITA'
+describe(log(data$Price))
 
-boxplot(data$Price)
+library(nortest) # test per ipotesi di normalità
+boxplot(data$Price, horizontal = T, ylab = c("Price") )
 qqnorm(data$Price);qqline(data$Price)
 shapiro.test(data$Price)
 ad.test(data$Price)
-
-#wilcox.test(data$Price, conf.int = TRUE, mu = ) #worth it?
-#if(!require(Envstats)) install.packages("EnvStats")
-
 ```
 
 Trying with the log correction:
@@ -195,11 +112,11 @@ Trying with the log correction:
 ```{r}
 # Correzione NORMALITA'
 library(nortest)
-boxplot(data$LogPrice)
-qqnorm(data$LogPrice);qqline(data$LogPrice)
-shapiro.test(data$LogPrice) #better than before, but still not normal according to shapiro
+boxplot(log(data$Price), ylab="log(Price)", horizontal = T)
+qqnorm(log(data$Price));qqline(log(data$Price))
+shapiro.test(log(data$Price)) #better than before, but still not normal according to shapiro
 
-ad.test(data$LogPrice)
+ad.test(log(data$Price))
 ```
 
 # Test on a mean (justify H0) on Y and confidence limits.
@@ -208,13 +125,12 @@ T-test
 
 ```{r}
 # One sample
-ref <- mean(data$Price)
+ref <- mean(data$Price) #FIXME: trova ref 
 Apple<-data$Price[data$Company=="Apple"]
 t.test(Apple,mu=ref,alternative = "greater")
 # Wilcoxon Signed Rank Test
 wilcox.test(Apple, mu=ref, conf.int = TRUE)
 
-#FIXME: var test?
 library(EnvStats)
 varTest(sample(data$Price), sigma.squared = (sd(data$Price)*sd(data$Price)))
 ```
@@ -249,26 +165,36 @@ chi_norm
 
 summary(b.table)
 
+#Proviamo SolidStateDisk vs dedicated_GPU FIXME: check
+b<-data
+b.table<-table(b$SolidStateDisk,b$dedicated_GPU)
+b.table
+prop.table(b.table,2)
+# chi square test 
+
+chisq.test(b.table)
+
+chi=chisq.test(b.table)
+chi_norm=chi$statistic/(nrow(b)*min(nrow(b.table)-1,ncol(b.table)-1))
+chi_norm
+
+summary(b.table)
 ```
 
 
 Correlazione per variabili quantitative
-
 ```{r}
 # seleziona solo variabili quantitative
 nums <- sapply(data, is.numeric)
 var_numeric <- data[,nums] 
-head(var_numeric)
 var_numeric$X=NULL
 ```
 
 ```{r}
-# Matrice di correlazione
-R<-cor(var_numeric)            
-R
-# Test di correlazione. (Spearsman's o Kendall tau)
-cor.test(var_numeric$Inches, var_numeric$Weight)
-#corrgram(var_numeric)
+# Test di correlazione. (Spearman's o Kendall tau)
+#if(!require(corrgram)) install.packages("corrgram")
+library(corrgram)
+corrgram(var_numeric)
 
 # Correlazione come grafo
 library(qgraph)
@@ -277,26 +203,24 @@ round(detcor, 2)
 # plot corr matrix: green positive red negative 
 qgraph(detcor, shape="circle", posCol="darkgreen", negCol="darkred")
 
+cor.test(var_numeric$Inches, var_numeric$Weight)
 ```
 
 Boxplot di confronto (pre-anova)
+
+```{r, fig.width=10}
+boxplot(log(data$Price)~data$Aggregated_Company, main="Boxplot Prezzo per compagnia", col= rainbow(6), horizontal = F)
+```
+
+
 ```{r}
-boxplot(data$Price~data$Company, 
-        main="Boxplot Prezzo per compagnia", 
-        col= rainbow(6), 
-        horizontal = F)
-boxplot(data$Price~data$SolidStateDisk, 
-        main="Prezzo vs ssd", 
-        col= rainbow(2), 
-        horizontal = F)
+boxplot(log(data$Price)~data$SolidStateDisk, main="Prezzo vs ssd", col= rainbow(2), horizontal = F)
 ```
 
 # Anova one way Y = Xj, for a categorical X
 
-A una via
-
 ```{r}
-lmA = lm(Price ~ SolidStateDisk, data=data)
+lmA = lm(log(Price) ~ SolidStateDisk, data=data)
 summary(lmA)
 drop1(lmA, test = 'F')
 anova(lmA)
@@ -308,49 +232,9 @@ ls_SolidStateDisk$lsmeans
 plot(ls_SolidStateDisk$lsmeans, alpha = .05)
 ```
 
-```{r}
-str(data)
-lm_gpu_test=lm(Price~GpuCompany, data = data) #just a try
-summary(lm_gpu_test)
-drop1(lm_gpu_test, test = 'F')
-anova(lm_gpu_test)
-
-summary(data$dedicated_GPU)
-lm_gpu_test=lm(Price~dedicated_GPU, data = data) #FIXME: seems not really worth it
-summary(lm_gpu_test)
-drop1(lm_gpu_test, test = 'F')
-anova(lm_gpu_test)
-
-
-```
-
-
-```{r}
-lmB = lm(Price ~ Company, data=data)
-summary(lmB)
-drop1(lmB, test = 'F')
-anova(lmB)
-
-library(lsmeans)
-ls_Company = lsmeans(lmB,pairwise ~ Company,adjust = 'tukey')
-#ls_Company$contrasts #FIXME: too long to be printed
-#ls_Company$lsmeans #mFIXME: aybe only the plot is enough?
-plot(ls_Company$lsmeans, alpha = .05)
-
-lmB_agg = lm(Price ~ Aggregated_Company, data=data) #seems to be fine
-summary(lmB_agg)
-drop1(lmB_agg, test = 'F')
-anova(lmB_agg)
-
-ls_Company_agg = lsmeans(lmB_agg,pairwise ~ Aggregated_Company,adjust = 'tukey')
-#ls_Company_agg$contrasts #FIXME: too long to be printed
-#ls_Company_agg$lsmeans #mFIXME: aybe only the plot is enough?
-plot(ls_Company_agg$lsmeans, alpha = .05) #i guess from here seems fine to leave "Razer" alone?
-
-
-```
 
 ```{r, fig.height=4, fig.width=6}
+#FIXME: tolto Price vs Aggregated_company, non ricordo se tenere o nop
 lmC = lm(Price ~ TypeName, data=data)
 summary(lmC)
 drop1(lmC, test = 'F')
@@ -371,7 +255,7 @@ plot(lmC)
 
 #(not) normal distribution of residuals
 par(mfrow=c(1,2))
-boxplot(lmC$residuals)
+boxplot(lmC$residuals, ylab="residuals (Price ~ Typename)")
 qqnorm(lmC$residuals);qqline(lmC$residuals)
 
 ad.test(lmC$residuals)
@@ -388,7 +272,6 @@ ls_TypeName_log$contrasts
 ls_TypeName_log$lsmeans
 plot(ls_TypeName_log$lsmeans, alpha = .05)
 
-
 coefplot(lmC_log, intercept = FALSE)
 
 par(mfrow = c(2,2))
@@ -396,7 +279,7 @@ plot(lmC_log)
 
 #(not) normal distribution of residuals
 par(mfrow=c(1,2))
-boxplot(lmC_log$residuals)
+boxplot(lmC_log$residuals, ylab="residuals (logPrice ~ Typename)")
 qqnorm(lmC_log$residuals);qqline(lmC_log$residuals)
 
 ad.test(lmC_log$residuals) #normal now!
@@ -407,156 +290,150 @@ shapiro.test(lmC_log$residuals) #borderline now!
 
 A due vie
 ```{r}
-# Con interazione
-lmC = lm(Price ~ Company*TypeName  , data=data)
-drop1(lmC, test="F")
-#summary(lmC) #FIXME: too long to be printed
+lmC = lm(log(Price) ~ Aggregated_Company+TypeName  , data=data)
+summary(lmC)
 
-lmC = lm(Price ~ Company+TypeName  , data=data)
 # type I effects A, B/A   C/A,B  
 anova(lmC)
 # type III effects A/B,C , B/A,C   C/A,B
 drop1(lmC, test="F")
-summary(lmC)
 
 # contrasti
 library(lsmeans)
-ls=lsmeans(lmC, #FIXME: @Andrea, c'era lmB ma credo tu volessi scrivere lmC, in case check it
-           pairwise ~ TypeName ,
-           adjust="tukey")
+ls=lsmeans(lmC, pairwise ~ TypeName ,adjust="tukey")
 ls$lsmeans
-# plot lsmeans and 95% confid int
-plot(ls$lsmeans, alpha = .05)
-# contrasts between predicted lsmeans
-ls$contrasts
-# if at least one contrast is significant, the variable
-# is significant in the anova table # drop1 effects
 
-# contrast among predicted lsmeans and overall lsmean
-c= contrast(ls, method = "eff")
+plot(ls$lsmeans, alpha = .05) # plot lsmeans and 95% confid int
+
+ls$contrasts # contrasts between predicted lsmeans
+# if at least one contrast is significant, the variable is significant in the anova table
+
+c= contrast(ls, method = "eff") # contrast among predicted lsmeans and overall lsmean
 c
+
 library(coefplot)
-coefplot(lmC, intercept=FALSE) #FIXME: @Andrea, same goes here
+coefplot(lmC, intercept=FALSE)
 ```
-ANOVA k way 
-```{r}
-lmK = lm(Price ~ Company+TypeName+SolidStateDisk  , data=data)
-summary(lmK)
-drop1(lmK, test="F") # type III SS
-coefplot(lmK, intercept=FALSE)
-```
+
+#FIXME: ho rimosso "anova k-way", tutti d'accordo?
 
 Regressione lineare
 ```{r}
-lmA<-lm(Price ~ Frequenza  , data=data)
-summary(lmA)
-plot(data$Frequenza,data$Price)
-abline(lmA,col="red")
+lmA1<-lm(log(Price) ~ Frequenza  , data=data)
+summary(lmA1)
+plot(data$Frequenza,log(data$Price))
+abline(lmA1,col="red")
 
-lmA<-lm(Price ~ Frequenza+Pixel+Ram  , data=data)
-summary(lmA)
-coefplot(lmA, intercept=FALSE)
-
+lmA2<-lm(log(Price) ~ Frequenza+Pixel+Ram  , data=data)
+summary(lmA2)
+coefplot(lmA2, intercept=FALSE)
 ```
 
 # Ancova Y = all covariates (qualitative +quantitative)
 
 ```{r}
-lmK = lm(Price ~ Company+TypeName+SolidStateDisk+ Frequenza+Pixel+Ram  , data=data)
+lmK = lm(log(Price) ~ Aggregated_Company+TypeName+SolidStateDisk+ Frequenza+Pixel+Ram  , data=data)
+```
+
+```{r}
 summary(lmK)
+```
+
+```{r}
 drop1(lmK, .~., test="F")
 
-ls=lsmeans(lmK,
-           pairwise ~ Company ,
-           adjust="tukey")
+ls=lsmeans(lmK,pairwise ~ Aggregated_Company ,adjust="tukey")
 c= contrast(ls, method = "eff")
-#c #FIXME: too long to be printed
+c #FIXME: too long to be printed
 ```
 
 ```{r, fig.height=4, fig.width=6}
-
-data$LogPrice=NULL
 data$Product=NULL
 data$X=NULL
-str(data)
-lm_full = lm(Price ~ ., data = data)
-#summary(lm_full) #FIXME: wayyy too long to be printed, R^2 =0.9586
+data$Company=NULL #uso solo Aggregated_Company
+data$Gpu=NULL #uso solo Gpu_company
+data$dedicated_GPU=NULL
+data$ScreenResolution=NULL #uso solo Pixels
+data$Risoluzione=NULL #uso solo Pixels
+data$Cpu=NULL #uso solo Frequenza
+data$Memory=NULL #uso solo MemorySSD, TotalMemory e SolidStateDisk
+
+lm_full = lm(log(Price) ~ ., data = data)
+summary(lm_full)
 anova(lm_full, test="F")
 drop1(lm_full, test="F")
 
-#coefplot(lm_full, intercept=FALSE) #meglio di no ahah
+coefplot(lm_full, intercept=FALSE) 
 
 par(mfrow=c(2,2))
 plot(lm_full)
 
 par(mfrow=c(1,1))
 par(mfrow=c(1,2))
-boxplot(lm_full$residuals)
-qqnorm(lm_full$residuals);qqline(lm_full$residuals) # probably the correction would work pretty fine here
-```
+boxplot(lm_full$residuals, ylab="residuals (log(Price) ~ .)")
+qqnorm(lm_full$residuals);qqline(lm_full$residuals)
 
-```{r}
-#tests
+#normality tests
 ad.test(lm_full$residuals)
 shapiro.test(lm_full$residuals)
 ```
 
-```{r, fig.height=4, fig.width=6}
-library(MASS)
-#to justify log correction
-boxcoxreg1<-boxcox(lm_full, plotit=T)
-which.max(boxcoxreg1$y)
-
-lambda=boxcoxreg1$x[which.max(boxcoxreg1$y)]
-lambda #FIXME: not really 0, one should actually apply (((y  )^lambda) - 1) / lambda but meh
-
-lm_full_t = lm(log(Price) ~ ., data = data)
-
-par(mfrow=c(2,2))
-plot(lm_full_t) #quite better
-
-ad.test(lm_full_t$residuals) #not really
-shapiro.test(lm_full_t$residuals)  #not really
-```
 
 A look over outliers
 
 ```{r, fig.height=4, fig.width=6}
-library(car)
-influencePlot(lm_full,main="Influence Plot", sub="Circle size is proportial to Cook's Distance" )
-
-#Cook's Distance
-cooksd <- cooks.distance(lm_full_t)
+cooksd <- cooks.distance(lm_full) #Cook's Distance
 cooksda=data.frame(cooksd)
 summary(cooksd)
 
-# identify D values > 4/(n-k-1)
-# Cook's D plot
-cutoff <- 4/((nrow(data)-length(lm_full_t$coefficients)-2))
-plot(lm_full_t, which=4, cook.levels=cutoff)
-
+cutoff <- 4/((nrow(data)-length(lm_full$coefficients)-2)) # identify D values > 4/(n-k-1)
+plot(lm_full, which=4, cook.levels=cutoff)# Cook's D plot
 
 plot(cooksd, pch="*", cex=1, main="Influential Obs by Cooks distance") # plot cook's distance
 abline(h = cutoff, col="red") # add cutoff line
-text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4*mean(cooksd, na.rm=T),names(cooksd),""),
-col="red")#add labels
+text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4*mean(cooksd, na.rm=T),names(cooksd),""), col="red")#add labels
 
 #extract influencial obs
 influential <- as.numeric(names(cooksd)[(cooksd > cutoff)]) # influential row numbers
 influ=data.frame(data[cooksd > cutoff, ])
 filtered_data <- data[ !(row.names(data) %in% c(influential)), ]
-#Outlier rimossi
+dim(influ); dim(data); dim(filtered_data)
+
+#removed outliers
 lm_full_t_no_OUTliers = lm(log(Price) ~ ., data = filtered_data)
+summary(lm_full_t_no_OUTliers)
 par(mfrow=c(2,2))
 plot(lm_full_t_no_OUTliers)
-
-#summary(lm_full_t_no_OUTliers) #FIXME: too long to be printed, R^2=0.9727
+library(car)
 ncvTest(lm_full_t_no_OUTliers)
 ```
+
+
 ```{r}
 null = lm(log(Price) ~ 1, data = filtered_data)
 full = lm(log(Price) ~ ., data = filtered_data)
+library(MASS)
 lm_fit = stepAIC(null, scope = list(upper = full), direction = "both", trace = FALSE)
+summary(lm_fit)
 drop1(lm_fit, test = 'F')
 ```
 
+# APPENDIX
+
+no log model and a log justification
+```{r, fig.height=4, fig.width=6}
+lm_full_no_log = lm(Price ~ ., data = data)
+summary(lm_full_no_log)
+par(mfrow=c(2,2))
+plot(lm_full_no_log) 
+
+ad.test(lm_full_no_log$residuals) 
+shapiro.test(lm_full_no_log$residuals)  
+
+library(MASS)
+boxcoxreg1<-boxcox(lm_full_no_log, plotit=T) #to justify log correction
+which.max(boxcoxreg1$y)
+
+lambda=boxcoxreg1$x[which.max(boxcoxreg1$y)]
+lambda #not exactly lambda= 0 but almost, one could also apply y'=((y^lambda) - 1) / lambda
+```
