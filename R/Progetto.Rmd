@@ -1,5 +1,5 @@
 ---
-title: "Progetto"
+title: "Foundation"
 author: "Andrea Corvaglia at All"
 date: "17 agosto 2019"
 geometry: margin=2cm
@@ -21,7 +21,7 @@ knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE, fig.align="cent
 # Descriptive analysis on Y
 \small
 ```{r}
-data <- read.csv("../data/Laptop2.csv")
+data<- data1 <- read.csv("../data/Laptop2.csv")
 str(data)
 head(data,3)
 ```
@@ -125,24 +125,26 @@ T-test
 
 ```{r}
 # One sample
-ref <- mean(data$Price) #FIXME: trova ref 
-Apple<-data$Price[data$Company=="Apple"]
-t.test(Apple,mu=ref,alternative = "greater")
-# Wilcoxon Signed Rank Test
-wilcox.test(Apple, mu=ref, conf.int = TRUE)
 
-library(EnvStats)
-varTest(sample(data$Price), sigma.squared = (sd(data$Price)*sd(data$Price)))
+ref <-666 #prezzo medio di mercato pc 2019 (€)
+
+
+t.test(log(data$Price),mu=log(ref),alternative = "greater")
+
+# Wilcoxon Signed Rank Test
+wilcox.test(log(data$Price), mu=log(ref), conf.int = TRUE)
 ```
 
 # Test two means, two variances (Y vs X) .
 
 ```{r}
 #Two sample
+Razer<-data$Price[data$Company=="Razer"]
 Other <-data$Price[data$Company!="Apple"]
-wilcox.test(Apple, Other, alternative = "g")
+t.test(log(Razer),log(Other),alternative = "greater")
+wilcox.test(log(Razer), log(Other), alternative = "g")
 # F test sulla varianza
-var.test(Apple, Other, alternative = "two.sided")
+var.test(log(Razer), log(Other), alternative = "two.sided")
 ```
 
 
@@ -163,22 +165,17 @@ chi=chisq.test(b.table)
 chi_norm=chi$statistic/(nrow(b)*min(nrow(b.table)-1,ncol(b.table)-1))
 chi_norm
 
-summary(b.table)
-
-#Proviamo SolidStateDisk vs dedicated_GPU FIXME: check
+#Proviamo SolidStateDisk vs dedicated_GPU
 b<-data
 b.table<-table(b$SolidStateDisk,b$dedicated_GPU)
 b.table
 prop.table(b.table,2)
 # chi square test 
-
 chisq.test(b.table)
 
 chi=chisq.test(b.table)
 chi_norm=chi$statistic/(nrow(b)*min(nrow(b.table)-1,ncol(b.table)-1))
 chi_norm
-
-summary(b.table)
 ```
 
 
@@ -218,32 +215,16 @@ boxplot(log(data$Price)~data$SolidStateDisk, main="Prezzo vs ssd", col= rainbow(
 ```
 
 # Anova one way Y = Xj, for a categorical X
-
-```{r}
-lmA = lm(log(Price) ~ SolidStateDisk, data=data)
-summary(lmA)
-drop1(lmA, test = 'F')
-anova(lmA)
-
-library(lsmeans)
-ls_SolidStateDisk = lsmeans(lmA,pairwise ~ SolidStateDisk,adjust = 'tukey')
-ls_SolidStateDisk$contrasts 
-ls_SolidStateDisk$lsmeans
-plot(ls_SolidStateDisk$lsmeans, alpha = .05)
-```
-
-
 ```{r, fig.height=4, fig.width=6}
-#FIXME: tolto Price vs Aggregated_company, non ricordo se tenere o nop
+library(lsmeans)
 lmC = lm(Price ~ TypeName, data=data)
 summary(lmC)
 drop1(lmC, test = 'F')
-anova(lmC)
 
 ls_TypeName = lsmeans(lmC,pairwise ~ TypeName,adjust = 'tukey')
-ls_TypeName$contrasts 
 ls_TypeName$lsmeans
 plot(ls_TypeName$lsmeans, alpha = .05)
+ls_TypeName$contrasts 
 
 
 library(coefplot)
@@ -265,12 +246,15 @@ shapiro.test(lmC$residuals)
 lmC_log = lm(log(Price) ~ TypeName, data=data)
 summary(lmC_log)#R^2 increases
 drop1(lmC_log, test = 'F')
-anova(lmC_log)
 
 ls_TypeName_log = lsmeans(lmC_log,pairwise ~ TypeName,adjust = 'tukey')
-ls_TypeName_log$contrasts 
 ls_TypeName_log$lsmeans
 plot(ls_TypeName_log$lsmeans, alpha = .05)
+ls_TypeName_log$contrasts 
+
+
+c= contrast(ls_TypeName_log , method = "eff") # contrast among predicted lsmeans and overall lsmean
+c
 
 coefplot(lmC_log, intercept = FALSE)
 
@@ -290,32 +274,14 @@ shapiro.test(lmC_log$residuals) #borderline now!
 
 A due vie
 ```{r}
-lmC = lm(log(Price) ~ Aggregated_Company+TypeName  , data=data)
+lmC = lm(log(Price) ~ SolidStateDisk*TypeName  , data=data)
 summary(lmC)
-
-# type I effects A, B/A   C/A,B  
-anova(lmC)
-# type III effects A/B,C , B/A,C   C/A,B
 drop1(lmC, test="F")
-
-# contrasti
-library(lsmeans)
-ls=lsmeans(lmC, pairwise ~ TypeName ,adjust="tukey")
-ls$lsmeans
-
-plot(ls$lsmeans, alpha = .05) # plot lsmeans and 95% confid int
-
-ls$contrasts # contrasts between predicted lsmeans
-# if at least one contrast is significant, the variable is significant in the anova table
-
-c= contrast(ls, method = "eff") # contrast among predicted lsmeans and overall lsmean
-c
 
 library(coefplot)
 coefplot(lmC, intercept=FALSE)
+interaction.plot(x.factor = data$TypeName, trace.factor = data$SolidStateDisk, response = log(data$Price), fun=mean, type="b", legend=TRUE, xlab = "Type", ylab="log(Price)", pch=c(1,1), col=c(2,5), main="Interaction Plot")
 ```
-
-#FIXME: ho rimosso "anova k-way", tutti d'accordo?
 
 Regressione lineare
 ```{r}
@@ -377,7 +343,7 @@ qqnorm(lm_full$residuals);qqline(lm_full$residuals)
 ad.test(lm_full$residuals)
 shapiro.test(lm_full$residuals)
 ```
-
+# APPENDIX
 
 A look over outliers
 
@@ -418,22 +384,22 @@ summary(lm_fit)
 drop1(lm_fit, test = 'F')
 ```
 
-# APPENDIX
+
 
 no log model and a log justification
 ```{r, fig.height=4, fig.width=6}
-lm_full_no_log = lm(Price ~ ., data = data)
-summary(lm_full_no_log)
+lm_full_no_log = lm(Price ~ ., data = data1)
+#summary(lm_full_no_log)
 par(mfrow=c(2,2))
 plot(lm_full_no_log) 
 
 ad.test(lm_full_no_log$residuals) 
 shapiro.test(lm_full_no_log$residuals)  
 
+
 library(MASS)
 boxcoxreg1<-boxcox(lm_full_no_log, plotit=T) #to justify log correction
-which.max(boxcoxreg1$y)
 
-lambda=boxcoxreg1$x[which.max(boxcoxreg1$y)]
-lambda #not exactly lambda= 0 but almost, one could also apply y'=((y^lambda) - 1) / lambda
+#lambda=boxcoxreg1$x[which.max(boxcoxreg1$y)]
+#lambda #not exactly lambda= 0 but compatible, one could also apply y'=((y^lambda) - 1) / lambda
 ```
