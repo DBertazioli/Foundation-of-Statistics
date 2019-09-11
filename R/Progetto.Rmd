@@ -310,7 +310,7 @@ drop1(lmK, .~., test="F")
 
 ls=lsmeans(lmK,pairwise ~ Aggregated_Company ,adjust="tukey")
 c= contrast(ls, method = "eff")
-c #FIXME: too long to be printed
+c
 ```
 
 ```{r, fig.height=4, fig.width=6}
