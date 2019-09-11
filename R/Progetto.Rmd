@@ -1,6 +1,6 @@
 ---
-title: "Foundation"
-author: "Andrea Corvaglia at All"
+title: "Foundations of Probability and Statistics: Project Report"
+author: "Dario Bertazioli, Andrea Corvaglia"
 date: "17 agosto 2019"
 geometry: margin=2cm
 output:
