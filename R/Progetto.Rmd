@@ -1,14 +1,14 @@
 ---
 title: "Foundations of Probability and Statistics: Project Report"
-author: "Dario Bertazioli, Andrea Corvaglia"
+author: "Dario Bertazioli, Andrea Corvaglia, Davide Toniolo"
 date: "17 agosto 2019"
 geometry: margin=2cm
 output:
-  pdf_document:
+  html_document:
     fig_height: 3
     fig_width: 5
     toc: yes
-  html_document:
+  pdf_document:
     fig_height: 3
     fig_width: 5
     toc: yes
